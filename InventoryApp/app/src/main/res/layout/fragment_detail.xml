@@ -6,48 +6,105 @@
     android:layout_height="match_parent"
     tools:context=".DetailFragment">
 
-    <GridView
+    <GridLayout
+        android:id="@+id/gridlayout_edit_item_details"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="2">
+        app:layout_constraintRight_toRightOf="parent"
+        android:columnCount="2">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textview_detail_item_name"
+            android:labelFor="@id/edittext_detail_item_name"
+            android:layout_marginStart="5dp"
+            android:gravity="right"
             android:text="@string/enter_name"/>
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="fill_horizontal"
+            app:layout_constraintRight_toRightOf="parent"
+            android:minHeight="48dp"
+            android:inputType="text"
             android:id="@+id/edittext_detail_item_name"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textview_detail_item_uid"
+            android:labelFor="@id/edittext_detail_item_uid"
+            android:layout_marginStart="5dp"
+            android:gravity="right"
             android:text="@string/uid"/>
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:minWidth="150dp"
+            android:minHeight="48dp"
+            android:inputType="number"
             android:id="@+id/edittext_detail_item_uid"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:gravity="right"
             android:id="@+id/textview_detail_item_description"
+            android:labelFor="@id/edittext_detail_item_description"
             android:text="@string/description"/>
         <EditText
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="fill_horizontal"
+            android:minHeight="48dp"
+            android:inputType="textMultiLine"
             android:id="@+id/edittext_detail_item_description"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:gravity="right"
             android:id="@+id/textview_detail_item_quantity"
+            android:labelFor="@id/edittext_detail_item_quantity"
             android:text="@string/quantity"/>
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:minWidth="100dp"
+            android:minHeight="48dp"
+            android:inputType="number"
             android:id="@+id/edittext_detail_item_quantity"/>
-    </GridView>
+    </GridLayout>
+
+    <Button
+        android:id="@+id/button_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/gridlayout_edit_item_details"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="50dp"
+        android:layout_marginStart="5dp"
+        android:layout_gravity="center"
+        android:text="Delete"/>
+
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/gridlayout_edit_item_details"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="5dp"
+        android:layout_gravity="center"
+        android:text="Save"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
