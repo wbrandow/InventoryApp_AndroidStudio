@@ -43,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="fill_horizontal"
             android:text="Item Description" />
+        <!-- Handle issue of text that is too long to fit in all elements -->
     </LinearLayout>
 
     <LinearLayout

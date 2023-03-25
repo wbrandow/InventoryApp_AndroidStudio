@@ -26,19 +26,9 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
-        List<Item> items = new ArrayList<>();
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
-        items.add(new Item());
+        ItemService itemService = ItemService.getItemService();
+        itemService.addItem(new Item());
+        List<Item> items = itemService.getItemList();
 
 
         // Send bands to RecyclerView
