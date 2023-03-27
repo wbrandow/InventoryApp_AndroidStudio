@@ -8,4 +8,10 @@
     <string name="quantity">Quantity:</string>
     <string name="save_item">Save Item</string>
     <string name="delete_item">Delete Item</string>
+    <string name="enter_login_details">Enter Login Details</string>
+    <string name="username">Username:</string>
+    <string name="password">Password:</string>
+    <string name="login">Login</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
 </resources>

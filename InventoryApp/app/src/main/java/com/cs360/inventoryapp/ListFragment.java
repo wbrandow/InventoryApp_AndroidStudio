@@ -26,6 +26,7 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
+        // FIXME: get list from database. probably do this in login fragment
         ItemService itemService = ItemService.getItemService();
         itemService.addItem(new Item());
         List<Item> items = itemService.getItemList();

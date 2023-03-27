@@ -11,5 +11,4 @@
         android:title="@string/delete_item"
         app:showAsAction="never"/>
 
-<!-- this is for a test. delete this comment -->
 </menu>

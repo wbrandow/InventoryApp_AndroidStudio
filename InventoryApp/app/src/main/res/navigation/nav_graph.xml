@@ -3,7 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/list_fragment">
+    app:startDestination="@id/login_fragment">
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.cs360.inventoryapp.LoginFragment"
+        android:label="Login">
+        <action
+            android:id="@+id/show_item_list"
+            app:destination="@id/list_fragment" />
+    </fragment>
     <fragment
         android:id="@+id/list_fragment"
         android:name="com.cs360.inventoryapp.ListFragment"
