@@ -135,9 +135,19 @@ public class ListFragment extends Fragment {
                         if (position != RecyclerView.NO_POSITION) {
                             Item clickedItem = mItems.get(position);
 
+                            // get item information
+                            String itemName = clickedItem.getItemName();
                             int itemUid = clickedItem.getItemUid();
+                            String itemDescription = clickedItem.getItemDescription();
+                            int itemQuantity = clickedItem.getItemQty();
+
+                            // create args to pass to DetailFragment
                             Bundle args = new Bundle();
+                            args.putString(DetailFragment.ITEM_NAME, itemName);
                             args.putInt(DetailFragment.ITEM_UID, itemUid);
+                            args.putString(DetailFragment.ITEM_DESCRIPTION, itemDescription);
+                            args.putInt(DetailFragment.ITEM_QUANTITY, itemQuantity);
+
                             Navigation.findNavController(view).navigate(R.id.detail_fragment, args);
                         }
                     }
