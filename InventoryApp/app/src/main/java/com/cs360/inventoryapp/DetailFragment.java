@@ -54,104 +54,82 @@ public class DetailFragment extends Fragment {
         }
 
         buttonSave.setOnClickListener(view -> {
+
             String toastMessage;
             String name = String.valueOf(editTextName.getText());
             String description = String.valueOf(editTextDescription.getText());
+
             try {
                 int uid = Integer.parseInt(String.valueOf(editTextUid.getText()));
                 int quantity = Integer.parseInt(String.valueOf(editTextQuantity.getText()));
 
-                ItemService itemService = ItemService.getItemService();
-                List<Item> items = itemService.getItemList();
+                ItemDatabase db = new ItemDatabase(getContext());
 
-                boolean updated = false;
-                for (int i = 0; i < items.size(); i++) {
-                    if (uid == items.get(i).getItemUid()) {
-                        itemService.updateItem(name, uid, description, quantity);
-                        updated = true;
-
-                        // notify user of successful update
-                        toastMessage = name + " successfully updated!";
-                        Context context = getContext();
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(context, toastMessage, duration);
-                        toast.show();
-
-                        // navigate back to list
-                        Navigation.findNavController(view).navigate(R.id.list_fragment);
-                    }
-                }
-                if (!updated) {
-                    Item newItem = new Item(name, uid, description, quantity);
-                    itemService.addItem(newItem);
+                if (db.updateItem(name, uid, description, quantity)) {
+                    // notify user of successful update
+                    toastMessage = name + " successfully updated!";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
+                } else {
+                    db.addItem(name, uid, description, quantity);
 
                     // notify user of successful addition
                     toastMessage = name + " added to inventory!";
-                    Context context = getContext();
                     int duration = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, toastMessage, duration);
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                     toast.show();
-
-                    // navigate back to list
-                    Navigation.findNavController(view).navigate(R.id.list_fragment);
                 }
-            } catch (NumberFormatException error) {
+
+                // navigate back to list
+                Navigation.findNavController(view).navigate(R.id.list_fragment);
+            }
+            catch (NumberFormatException error){
                 String message = "onClick: Value entered into UID or Quantity not an integer.";
                 Log.e(TAG, message, error);
 
                 // Prompt user to fix error
                 toastMessage = "UID and Quantity must both be integer values.";
-                Context context = getContext();
                 int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, toastMessage, duration);
+                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();
             }
         });
 
         buttonDelete.setOnClickListener(view -> {
+
             String toastMessage;
 
             try {
                 int uid = parseInt(String.valueOf(editTextUid.getText()));
 
-                ItemService itemService = ItemService.getItemService();
-                List<Item> items = itemService.getItemList();
+                ItemDatabase db = new ItemDatabase(getContext());
 
-                boolean deleted = false;
-                for(int i = 0; i < items.size(); i++) {
-                    if(uid == items.get(i).getItemUid()) {
-                        itemService.deleteItem(uid);
-                        deleted = true;
+                if (db.deleteItem(uid)) {
+                    // notify of successful delete
+                    toastMessage = "Item with UID: " + uid + " deleted.";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
 
-                        // notify of successful delete
-                        toastMessage = "Item with UID: " + uid + " deleted.";
-                        Context context = getContext();
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(context, toastMessage, duration);
-                        toast.show();
-
-                        // navigate back to list
-                        Navigation.findNavController(view).navigate(R.id.list_fragment);
-                    }
-                }
-                if(!deleted) {
+                    // navigate back to list
+                    Navigation.findNavController(view).navigate(R.id.list_fragment);
+                } else {
                     // notify user of no item exists
                     toastMessage = "Item with UID: " + uid + " not found.";
-                    Context context = getContext();
                     int duration = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, toastMessage, duration);
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                     toast.show();
                 }
             }
             catch (NumberFormatException error) {
-                String message = "onClick: Value entered into UID or Quantity not an integer.";
+                String message = "onClick: Value entered into UID not an integer.";
                 Log.e(TAG, message, error);
 
                 // Prompt user to fix error
                 toastMessage = "UID must be an integer value.";
-                Context context = getContext();
                 int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, toastMessage, duration);
+                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();
             }
         });

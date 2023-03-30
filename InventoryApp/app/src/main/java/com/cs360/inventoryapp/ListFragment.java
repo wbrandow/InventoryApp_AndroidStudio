@@ -26,13 +26,11 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
-        // FIXME: get list from database. probably do this in login fragment
-        ItemService itemService = ItemService.getItemService();
-        itemService.addItem(new Item());
-        List<Item> items = itemService.getItemList();
+        // FIXME: need to figure out authenication.
+        ItemDatabase db = new ItemDatabase(getContext());
+        List<Item> items = db.getAllItems();
 
-
-        // Send bands to RecyclerView
+        // Send items to RecyclerView
         RecyclerView recyclerView = rootView.findViewById(R.id.my_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
         recyclerView.setAdapter(new ItemAdapter(items));
@@ -100,11 +98,24 @@ public class ListFragment extends Fragment {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
                             Item clickedItem = mItems.get(position);
+                            ItemDatabase db = new ItemDatabase(getContext());
+                            int uid = clickedItem.getItemUid();
+                            Item item = db.getItemByUid(uid);
 
-                            int itemQty = clickedItem.getItemQty();
-                            itemQty -= 1;
-                            clickedItem.setItemQty(itemQty);
-                            mTextViewQuantity.setText(String.valueOf(itemQty));
+                            // get item info
+                            String name = item.getItemName();
+                            uid = item.getItemUid();
+                            String description = item.getItemDescription();
+                            int quantity = item.getItemQty();
+
+                            // decrement quantity
+                            quantity -= 1;
+
+                            // update database
+                            db.updateItem(name, uid, description, quantity);
+
+                            // update TextView
+                            mTextViewQuantity.setText(String.valueOf(quantity));
                         }
                     }
                 });
@@ -115,11 +126,24 @@ public class ListFragment extends Fragment {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
                             Item clickedItem = mItems.get(position);
+                            ItemDatabase db = new ItemDatabase(getContext());
+                            int uid = clickedItem.getItemUid();
+                            Item item = db.getItemByUid(uid);
 
-                            int itemQty = clickedItem.getItemQty();
-                            itemQty += 1;
-                            clickedItem.setItemQty(itemQty);
-                            mTextViewQuantity.setText(String.valueOf(itemQty));
+                            // get item info
+                            String name = item.getItemName();
+                            uid = item.getItemUid();
+                            String description = item.getItemDescription();
+                            int quantity = item.getItemQty();
+
+                            // increment quantity
+                            quantity += 1;
+
+                            // update database
+                            db.updateItem(name, uid, description, quantity);
+
+                            // update TextView
+                            mTextViewQuantity.setText(String.valueOf(quantity));
                         }
                     }
                 });
@@ -134,12 +158,15 @@ public class ListFragment extends Fragment {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
                             Item clickedItem = mItems.get(position);
+                            ItemDatabase db = new ItemDatabase(getContext());
+                            int uid = clickedItem.getItemUid();
+                            Item item = db.getItemByUid(uid);
 
                             // get item information
-                            String itemName = clickedItem.getItemName();
-                            int itemUid = clickedItem.getItemUid();
-                            String itemDescription = clickedItem.getItemDescription();
-                            int itemQuantity = clickedItem.getItemQty();
+                            String itemName = item.getItemName();
+                            int itemUid = item.getItemUid();
+                            String itemDescription = item.getItemDescription();
+                            int itemQuantity = item.getItemQty();
 
                             // create args to pass to DetailFragment
                             Bundle args = new Bundle();
