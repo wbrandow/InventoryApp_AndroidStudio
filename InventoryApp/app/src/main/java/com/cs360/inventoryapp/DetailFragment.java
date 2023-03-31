@@ -72,10 +72,10 @@ public class DetailFragment extends Fragment {
                     Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                     toast.show();
                 } else {
-                    db.addItem(name, uid, description, quantity);
+                    long systemID = db.addItem(name, uid, description, quantity);
 
                     // notify user of successful addition
-                    toastMessage = name + " added to inventory!";
+                    toastMessage = name + " added to inventory with id " + systemID;
                     int duration = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                     toast.show();

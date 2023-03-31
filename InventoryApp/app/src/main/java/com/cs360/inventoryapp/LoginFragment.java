@@ -27,16 +27,13 @@ public class LoginFragment extends Fragment {
         mEditTextPassword = view.findViewById(R.id.edittext_login_password);
         mButtonSubmit = view.findViewById(R.id.button_login_submit);
 
-        mButtonSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = String.valueOf(mEditTextUsername.getText());
-                String password = String.valueOf(mEditTextPassword.getText());
+        mButtonSubmit.setOnClickListener(v -> {
+            String username = String.valueOf(mEditTextUsername.getText());
+            String password = String.valueOf(mEditTextPassword.getText());
 
-                // FIXME: Check username and password
+            // FIXME: Check username and password
 
-                Navigation.findNavController(view).navigate(R.id.list_fragment);
-            }
+            Navigation.findNavController(view).navigate(R.id.list_fragment);
         });
 
         return view;

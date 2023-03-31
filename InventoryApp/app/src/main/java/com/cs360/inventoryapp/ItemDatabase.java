@@ -54,8 +54,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         values.put(ItemTable.COL_DESCRIPTION, description);
         values.put(ItemTable.COL_QUANTITY, quantity);
 
-        long itemId = db.insert(ItemTable.TABLE, null, values);
-        return itemId;
+        return db.insert(ItemTable.TABLE, null, values);
     }
 
     public List<Item> getAllItems() {

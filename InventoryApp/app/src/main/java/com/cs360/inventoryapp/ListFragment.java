@@ -1,13 +1,11 @@
 package com.cs360.inventoryapp;
 
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,18 +13,25 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
 public class ListFragment extends Fragment {
+
+    private FloatingActionButton mFab;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
-        // FIXME: need to figure out authenication.
+        // Floating Action Button takes user to detail screen to add new item
+        mFab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        mFab.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.detail_fragment);
+        });
+
+        // FIXME: need to figure out authentication.
         ItemDatabase db = new ItemDatabase(getContext());
         List<Item> items = db.getAllItems();
 
@@ -41,6 +46,7 @@ public class ListFragment extends Fragment {
 
         return rootView;
     }
+
     public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         private List<Item> mItems;
 
@@ -71,15 +77,15 @@ public class ListFragment extends Fragment {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public ImageView mImageViewItemPic;
-            public TextView mTextViewName;
-            public TextView mTextViewUid;
-            public TextView mTextViewDescription;
-            public TextView mTextViewQuantity;
-            public Button mButtonDecrement;
-            public Button mButtonIncrement;
+            private ImageView mImageViewItemPic;
+            private TextView mTextViewName;
+            private TextView mTextViewUid;
+            private TextView mTextViewDescription;
+            private TextView mTextViewQuantity;
+            private Button mButtonDecrement;
+            private Button mButtonIncrement;
 
-            public LinearLayout mItemContents;
+            private LinearLayout mItemContents;
 
             public ViewHolder(View view) {
                 super(view);
@@ -152,31 +158,28 @@ public class ListFragment extends Fragment {
                  *  When a user clicks the contents of an item pass the item's UID to the detail fragment
                  *  as an argument.
                  */
-                mItemContents.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            Item clickedItem = mItems.get(position);
-                            ItemDatabase db = new ItemDatabase(getContext());
-                            int uid = clickedItem.getItemUid();
-                            Item item = db.getItemByUid(uid);
+                mItemContents.setOnClickListener(v -> {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Item clickedItem = mItems.get(position);
+                        ItemDatabase db = new ItemDatabase(getContext());
+                        int uid = clickedItem.getItemUid();
+                        Item item = db.getItemByUid(uid);
 
-                            // get item information
-                            String itemName = item.getItemName();
-                            int itemUid = item.getItemUid();
-                            String itemDescription = item.getItemDescription();
-                            int itemQuantity = item.getItemQty();
+                        // get item information
+                        String itemName = item.getItemName();
+                        int itemUid = item.getItemUid();
+                        String itemDescription = item.getItemDescription();
+                        int itemQuantity = item.getItemQty();
 
-                            // create args to pass to DetailFragment
-                            Bundle args = new Bundle();
-                            args.putString(DetailFragment.ITEM_NAME, itemName);
-                            args.putInt(DetailFragment.ITEM_UID, itemUid);
-                            args.putString(DetailFragment.ITEM_DESCRIPTION, itemDescription);
-                            args.putInt(DetailFragment.ITEM_QUANTITY, itemQuantity);
+                        // create args to pass to DetailFragment
+                        Bundle args = new Bundle();
+                        args.putString(DetailFragment.ITEM_NAME, itemName);
+                        args.putInt(DetailFragment.ITEM_UID, itemUid);
+                        args.putString(DetailFragment.ITEM_DESCRIPTION, itemDescription);
+                        args.putInt(DetailFragment.ITEM_QUANTITY, itemQuantity);
 
-                            Navigation.findNavController(view).navigate(R.id.detail_fragment, args);
-                        }
+                        Navigation.findNavController(v).navigate(R.id.detail_fragment, args);
                     }
                 });
             }

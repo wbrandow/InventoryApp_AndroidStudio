@@ -67,6 +67,20 @@
                 android:text="@string/login" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_columnSpan="2">
+            <Button
+                android:id="@+id/button_create_account_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/create_account" />
+        </LinearLayout>
+
     </GridLayout>
 
 
