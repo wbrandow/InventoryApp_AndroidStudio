@@ -38,4 +38,15 @@ public class LoginFragment extends Fragment {
 
         return view;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mButtonSubmit.setOnClickListener(null);
+
+        mEditTextPassword = null;
+        mEditTextUsername = null;
+        mButtonSubmit = null;
+    }
 }

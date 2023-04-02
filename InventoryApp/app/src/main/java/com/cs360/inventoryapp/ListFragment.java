@@ -19,6 +19,9 @@ import java.util.List;
 public class ListFragment extends Fragment {
 
     private FloatingActionButton mFab;
+    private List<Item> mItems;
+    private RecyclerView mRecyclerView;
+    private DividerItemDecoration mDivider;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,22 +36,34 @@ public class ListFragment extends Fragment {
 
         // FIXME: need to figure out authentication.
         ItemDatabase db = new ItemDatabase(getContext());
-        List<Item> items = db.getAllItems();
+        mItems = db.getAllItems();
+        db.close();
 
         // Send items to RecyclerView
-        RecyclerView recyclerView = rootView.findViewById(R.id.my_recycler_view);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        recyclerView.setAdapter(new ItemAdapter(items));
+        mRecyclerView = rootView.findViewById(R.id.my_recycler_view);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
+        mRecyclerView.setAdapter(new ItemAdapter(mItems));
 
-        DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(),
+        mDivider = new DividerItemDecoration(mRecyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
-        recyclerView.addItemDecoration(divider);
+        mRecyclerView.addItemDecoration(mDivider);
 
         return rootView;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mFab = null;
+        mItems = null;
+        mDivider = null;
+        mRecyclerView.setAdapter(null);
+        mRecyclerView.setLayoutManager(null);
+        mRecyclerView = null;
+    }
+
     public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
-        private List<Item> mItems;
 
         public ItemAdapter(List<Item> items) {
             mItems = items;
@@ -117,8 +132,9 @@ public class ListFragment extends Fragment {
                             // decrement quantity
                             quantity -= 1;
 
-                            // update database
+                            // update database and close it
                             db.updateItem(name, uid, description, quantity);
+                            db.close();
 
                             // update TextView
                             mTextViewQuantity.setText(String.valueOf(quantity));
@@ -145,8 +161,9 @@ public class ListFragment extends Fragment {
                             // increment quantity
                             quantity += 1;
 
-                            // update database
+                            // update database and close it
                             db.updateItem(name, uid, description, quantity);
+                            db.close();
 
                             // update TextView
                             mTextViewQuantity.setText(String.valueOf(quantity));
@@ -165,6 +182,9 @@ public class ListFragment extends Fragment {
                         ItemDatabase db = new ItemDatabase(getContext());
                         int uid = clickedItem.getItemUid();
                         Item item = db.getItemByUid(uid);
+
+                        // close database
+                        db.close();
 
                         // get item information
                         String itemName = item.getItemName();

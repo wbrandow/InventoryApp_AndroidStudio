@@ -25,19 +25,26 @@ public class DetailFragment extends Fragment {
     public static final String ITEM_DESCRIPTION = "description";
     public static final String ITEM_QUANTITY = "quantity";
 
+    private Button mButtonSave;
+    private Button mButtonDelete;
+    private EditText mEditTextName;
+    private EditText mEditTextUid;
+    private EditText mEditTextDescription;
+    private EditText mEditTextQuantity;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        Button buttonSave = rootView.findViewById(R.id.button_save);
-        Button buttonDelete = rootView.findViewById(R.id.button_delete);
+        mButtonSave = rootView.findViewById(R.id.button_save);
+        mButtonDelete = rootView.findViewById(R.id.button_delete);
 
-        EditText editTextName = rootView.findViewById(R.id.edittext_detail_item_name);
-        EditText editTextUid = rootView.findViewById(R.id.edittext_detail_item_uid);
-        EditText editTextDescription = rootView.findViewById(R.id.edittext_detail_item_description);
-        EditText editTextQuantity = rootView.findViewById(R.id.edittext_detail_item_quantity);
+        mEditTextName = rootView.findViewById(R.id.edittext_detail_item_name);
+        mEditTextUid = rootView.findViewById(R.id.edittext_detail_item_uid);
+        mEditTextDescription = rootView.findViewById(R.id.edittext_detail_item_description);
+        mEditTextQuantity = rootView.findViewById(R.id.edittext_detail_item_quantity);
 
         // Get the clickedItem info from ListFragment
         Bundle args = getArguments();
@@ -47,23 +54,22 @@ public class DetailFragment extends Fragment {
             String itemDescription = args.getString(ITEM_DESCRIPTION, null);
             int itemQuantity = args.getInt(ITEM_QUANTITY, -9999);
 
-            editTextName.setText(itemName);
-            editTextUid.setText(Integer.toString(itemUid));
-            editTextDescription.setText(itemDescription);
-            editTextQuantity.setText(Integer.toString(itemQuantity));
+            mEditTextName.setText(itemName);
+            mEditTextUid.setText(Integer.toString(itemUid));
+            mEditTextDescription.setText(itemDescription);
+            mEditTextQuantity.setText(Integer.toString(itemQuantity));
         }
 
-        buttonSave.setOnClickListener(view -> {
+        mButtonSave.setOnClickListener(view -> {
 
             String toastMessage;
-            String name = String.valueOf(editTextName.getText());
-            String description = String.valueOf(editTextDescription.getText());
+            String name = String.valueOf(mEditTextName.getText());
+            String description = String.valueOf(mEditTextDescription.getText());
+            ItemDatabase db = new ItemDatabase(getContext());
 
             try {
-                int uid = Integer.parseInt(String.valueOf(editTextUid.getText()));
-                int quantity = Integer.parseInt(String.valueOf(editTextQuantity.getText()));
-
-                ItemDatabase db = new ItemDatabase(getContext());
+                int uid = Integer.parseInt(String.valueOf(mEditTextUid.getText()));
+                int quantity = Integer.parseInt(String.valueOf(mEditTextQuantity.getText()));
 
                 if (db.updateItem(name, uid, description, quantity)) {
                     // notify user of successful update
@@ -94,16 +100,18 @@ public class DetailFragment extends Fragment {
                 Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();
             }
+            finally {
+                db.close();
+            }
         });
 
-        buttonDelete.setOnClickListener(view -> {
+        mButtonDelete.setOnClickListener(view -> {
 
             String toastMessage;
+            ItemDatabase db = new ItemDatabase(getContext());
 
             try {
-                int uid = parseInt(String.valueOf(editTextUid.getText()));
-
-                ItemDatabase db = new ItemDatabase(getContext());
+                int uid = parseInt(String.valueOf(mEditTextUid.getText()));
 
                 if (db.deleteItem(uid)) {
                     // notify of successful delete
@@ -132,9 +140,27 @@ public class DetailFragment extends Fragment {
                 Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();
             }
+            finally {
+                db.close();
+            }
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mButtonSave.setOnClickListener(null);
+        mButtonDelete.setOnClickListener(null);
+
+        mButtonSave = null;
+        mButtonDelete = null;
+        mEditTextName = null;
+        mEditTextUid = null;
+        mEditTextDescription = null;
+        mEditTextQuantity = null;
     }
 
 }

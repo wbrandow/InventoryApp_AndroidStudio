@@ -54,7 +54,11 @@ public class ItemDatabase extends SQLiteOpenHelper {
         values.put(ItemTable.COL_DESCRIPTION, description);
         values.put(ItemTable.COL_QUANTITY, quantity);
 
-        return db.insert(ItemTable.TABLE, null, values);
+        long result = db.insert(ItemTable.TABLE, null, values);
+
+        db.close();
+
+        return result;
     }
 
     public List<Item> getAllItems() {
@@ -77,6 +81,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
+        db.close();
 
         return itemsList;
     }
@@ -102,6 +107,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
+        db.close();
 
         return selectedItem;
     }
@@ -117,13 +123,20 @@ public class ItemDatabase extends SQLiteOpenHelper {
 
         int rowsUpdated = db.update(ItemTable.TABLE, values, "uid = ?",
                 new String[] { Integer.toString(uid) });
+
+        db.close();
+
         return rowsUpdated > 0;
     }
 
     public boolean deleteItem(int uid) {
         SQLiteDatabase db = getWritableDatabase();
+
         int rowsDeleted = db.delete(ItemTable.TABLE, ItemTable.COL_UID + " = ?",
                 new String[] { Integer.toString(uid) });
+
+        db.close();
+
         return rowsDeleted > 0;
     }
 }
