@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DetailFragment">
-
+<!-- FIXME: constraints issues with GridLayout, see debug messages -->
     <GridLayout
         android:id="@+id/gridlayout_edit_item_details"
         android:layout_width="match_parent"

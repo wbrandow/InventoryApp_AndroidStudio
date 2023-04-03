@@ -11,20 +11,15 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Menu mMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.appbar_menu, menu);
-        mMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -35,5 +30,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-
 }
