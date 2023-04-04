@@ -1,6 +1,8 @@
 package com.cs360.inventoryapp;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -22,6 +24,8 @@ public class ListFragment extends Fragment {
     private List<Item> mItems;
     private RecyclerView mRecyclerView;
     private DividerItemDecoration mDivider;
+    private GridLayoutManager mGridLayoutManager;
+    private ItemAdapter mItemAdaptor;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -29,20 +33,22 @@ public class ListFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
         // Floating Action Button takes user to detail screen to add new item
-        mFab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        mFab.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.detail_fragment);
-        });
+        mFab = rootView.findViewById(R.id.fab);
+        mFab.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.detail_fragment));
 
         // FIXME: need to figure out authentication.
+
         ItemDatabase db = new ItemDatabase(getContext());
         mItems = db.getAllItems();
         db.close();
 
+
         // Send items to RecyclerView
         mRecyclerView = rootView.findViewById(R.id.my_recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        mRecyclerView.setAdapter(new ItemAdapter(mItems));
+        mGridLayoutManager = new GridLayoutManager(getContext(),1);
+        mRecyclerView.setLayoutManager(mGridLayoutManager);
+        mItemAdaptor = new ItemAdapter(mItems);
+        mRecyclerView.setAdapter(mItemAdaptor);
 
         mDivider = new DividerItemDecoration(mRecyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
@@ -55,9 +61,12 @@ public class ListFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
+        mFab.setOnClickListener(null);
         mFab = null;
         mItems = null;
         mDivider = null;
+        mGridLayoutManager = null;
+        mItemAdaptor = null;
         mRecyclerView.setAdapter(null);
         mRecyclerView.setLayoutManager(null);
         mRecyclerView = null;
@@ -69,6 +78,7 @@ public class ListFragment extends Fragment {
             mItems = items;
         }
 
+        @NonNull
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
@@ -99,25 +109,23 @@ public class ListFragment extends Fragment {
             private TextView mTextViewQuantity;
             private Button mButtonDecrement;
             private Button mButtonIncrement;
-
             private LinearLayout mItemContents;
 
             public ViewHolder(View view) {
                 super(view);
-                mImageViewItemPic = (ImageView) view.findViewById(R.id.imageViewItemPic);
-                mTextViewName = (TextView) view.findViewById(R.id.textViewName);
-                mTextViewUid = (TextView) view.findViewById(R.id.textViewUid);
-                mTextViewDescription = (TextView) view.findViewById(R.id.textViewDescription);
-                mTextViewQuantity = (TextView) view.findViewById(R.id.textViewItemQuantity);
-                mButtonDecrement = (Button) view.findViewById(R.id.buttonDecrement);
-                mButtonIncrement = (Button) view.findViewById(R.id.buttonIncrement);
-                mItemContents = (LinearLayout) view.findViewById(R.id.item_content);
+                mImageViewItemPic = view.findViewById(R.id.imageViewItemPic);
+                mTextViewName = view.findViewById(R.id.textViewName);
+                mTextViewUid = view.findViewById(R.id.textViewUid);
+                mTextViewDescription = view.findViewById(R.id.textViewDescription);
+                mTextViewQuantity = view.findViewById(R.id.textViewItemQuantity);
+                mButtonDecrement = view.findViewById(R.id.buttonDecrement);
+                mButtonIncrement = view.findViewById(R.id.buttonIncrement);
+                mItemContents = view.findViewById(R.id.item_content);
 
-                mButtonDecrement.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
+                mButtonDecrement.setOnClickListener(v -> {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Thread thread = new Thread(() -> {
                             Item clickedItem = mItems.get(position);
                             ItemDatabase db = new ItemDatabase(getContext());
                             int uid = clickedItem.getItemUid();
@@ -136,17 +144,20 @@ public class ListFragment extends Fragment {
                             db.updateItem(name, uid, description, quantity);
                             db.close();
 
-                            // update TextView
-                            mTextViewQuantity.setText(String.valueOf(quantity));
-                        }
+                            int finalQuantity = quantity;
+                            getActivity().runOnUiThread(() -> {
+                                // update TextView
+                                mTextViewQuantity.setText(String.valueOf(finalQuantity));
+                            });
+                        });
+                        thread.start();
                     }
                 });
 
-                mButtonIncrement.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
+                mButtonIncrement.setOnClickListener(v -> {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Thread thread = new Thread(() -> {
                             Item clickedItem = mItems.get(position);
                             ItemDatabase db = new ItemDatabase(getContext());
                             int uid = clickedItem.getItemUid();
@@ -154,20 +165,23 @@ public class ListFragment extends Fragment {
 
                             // get item info
                             String name = item.getItemName();
-                            uid = item.getItemUid();
                             String description = item.getItemDescription();
                             int quantity = item.getItemQty();
 
-                            // increment quantity
+                            // decrement quantity
                             quantity += 1;
 
                             // update database and close it
                             db.updateItem(name, uid, description, quantity);
                             db.close();
 
-                            // update TextView
-                            mTextViewQuantity.setText(String.valueOf(quantity));
-                        }
+                            int finalQuantity = quantity;
+                            getActivity().runOnUiThread(() -> {
+                                // update TextView
+                                mTextViewQuantity.setText(String.valueOf(finalQuantity));
+                            });
+                        });
+                        thread.start();
                     }
                 });
 
@@ -203,6 +217,23 @@ public class ListFragment extends Fragment {
                     }
                 });
             }
+        }
+
+        @Override
+        public void onViewRecycled(@NonNull ViewHolder holder) {
+            super.onViewRecycled(holder);
+            holder.mButtonDecrement.setOnClickListener(null);
+            holder.mButtonIncrement.setOnClickListener(null);
+            holder.mButtonDecrement = null;
+            holder.mButtonIncrement = null;
+            holder.mImageViewItemPic.setImageDrawable(null);
+            holder.mImageViewItemPic = null;
+            holder.mTextViewName = null;
+            holder.mTextViewDescription = null;
+            holder.mTextViewUid = null;
+            holder.mTextViewQuantity = null;
+            holder.mItemContents.setOnClickListener(null);
+            holder.mItemContents = null;
         }
     }
 }

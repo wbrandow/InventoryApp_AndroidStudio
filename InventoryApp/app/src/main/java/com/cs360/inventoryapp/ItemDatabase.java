@@ -99,8 +99,6 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 int itemUid = cursor.getInt(2);
                 String itemDescription = cursor.getString(3);
                 int itemQuantity = cursor.getInt(4);
-                Log.d(TAG, "Item = " + id + ", " + itemName + ", " + itemUid +
-                        ", " + itemDescription + ", " + itemQuantity);
 
                 selectedItem = new Item(itemName, itemUid, itemDescription, itemQuantity);
 
