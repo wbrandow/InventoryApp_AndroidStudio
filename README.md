@@ -1,6 +1,6 @@
 # InventoryApp_AndroidStudio
 Basic inventory app to allow adding, updating, and deleteing items from a database stored on user's device.
-This is an active project.  Below are screenshots of the current state of the app as of 2023-03-29:
+This is an active project.  Below are screenshots of the current state of the app as of 2023-04-06:
 
 # LoginFragment
 <img width="497" alt="2023-03-29_InventoryApp_Login" src="https://user-images.githubusercontent.com/31283921/228623314-b3d989d5-840d-44e7-9245-d2cc94487e14.png">
