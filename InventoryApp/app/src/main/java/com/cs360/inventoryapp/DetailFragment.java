@@ -2,24 +2,19 @@ package com.cs360.inventoryapp;
 
 import static android.content.ContentValues.TAG;
 import static java.lang.Integer.parseInt;
-
 import android.app.Activity;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
-
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,9 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -233,7 +226,6 @@ public class DetailFragment extends Fragment {
 
         mButtonSave.setOnClickListener(null);
         mButtonDelete.setOnClickListener(null);
-
         mButtonSave = null;
         mButtonDelete = null;
         mEditTextName = null;

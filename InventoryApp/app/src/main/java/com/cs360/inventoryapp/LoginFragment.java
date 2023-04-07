@@ -1,15 +1,8 @@
 package com.cs360.inventoryapp;
 
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
-import android.telephony.SmsManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class LoginFragment extends Fragment {
-    private static final int REQUEST_SEND_SMS_PERMISSION = 123;
     private EditText mEditTextUsername;
     private EditText mEditTextPassword;
 

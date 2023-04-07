@@ -1,6 +1,5 @@
 package com.cs360.inventoryapp;
 
-import java.sql.Blob;
 
 public class Item {
     private byte[] itemImage;
