@@ -1,14 +1,12 @@
 package com.cs360.inventoryapp;
 
-import static android.content.ContentValues.TAG;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +25,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         private static final String COL_UID = "uid";
         private static final String COL_DESCRIPTION = "description";
         private static final String COL_QUANTITY = "quantity";
+        private static final String COL_IMAGE = "image";
     }
 
     @Override
@@ -36,7 +35,8 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 ItemTable.COL_NAME + " text, " +
                 ItemTable.COL_UID + " integer, " +
                 ItemTable.COL_DESCRIPTION + " text, " +
-                ItemTable.COL_QUANTITY + " integer)");
+                ItemTable.COL_QUANTITY + " integer, " +
+                ItemTable.COL_IMAGE + " blob)");
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long addItem(String name, int uid, String description, int quantity) {
+    public long addItem(String name, int uid, String description, int quantity, byte[] image) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -53,6 +53,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         values.put(ItemTable.COL_UID, uid);
         values.put(ItemTable.COL_DESCRIPTION, description);
         values.put(ItemTable.COL_QUANTITY, quantity);
+        values.put(ItemTable.COL_IMAGE, image);
 
         long result = db.insert(ItemTable.TABLE, null, values);
 
@@ -75,8 +76,9 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 int uid = cursor.getInt(2);
                 String description = cursor.getString(3);
                 int quantity = cursor.getInt(4);
+                byte[] image = cursor.getBlob(5);
 
-                currentItem = new Item(name, uid, description, quantity);
+                currentItem = new Item(name, uid, description, quantity, image);
                 itemsList.add(currentItem);
             } while (cursor.moveToNext());
         }
@@ -99,8 +101,9 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 int itemUid = cursor.getInt(2);
                 String itemDescription = cursor.getString(3);
                 int itemQuantity = cursor.getInt(4);
+                byte[] itemImage = cursor.getBlob(5);
 
-                selectedItem = new Item(itemName, itemUid, itemDescription, itemQuantity);
+                selectedItem = new Item(itemName, itemUid, itemDescription, itemQuantity, itemImage);
 
             } while (cursor.moveToNext());
         }
@@ -110,7 +113,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         return selectedItem;
     }
 
-    public boolean updateItem(String name, int uid, String description, int quantity) {
+    public boolean updateItem(String name, int uid, String description, int quantity, byte[] image) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -118,6 +121,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         values.put(ItemTable.COL_UID, uid);
         values.put(ItemTable.COL_DESCRIPTION, description);
         values.put(ItemTable.COL_QUANTITY, quantity);
+        values.put(ItemTable.COL_IMAGE, image);
 
         int rowsUpdated = db.update(ItemTable.TABLE, values, "uid = ?",
                 new String[] { Integer.toString(uid) });

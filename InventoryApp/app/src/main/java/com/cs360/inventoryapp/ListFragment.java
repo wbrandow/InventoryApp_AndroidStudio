@@ -1,8 +1,18 @@
 package com.cs360.inventoryapp;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -15,6 +25,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
@@ -58,6 +70,41 @@ public class ListFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Call the ActivityResultLauncher to request the SEND_SMS permission
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(android.Manifest.permission.SEND_SMS);
+        } else {
+            // Permission is already granted, send SMS message
+        }
+    }
+
+    // Initialize the ActivityResultLauncher in the onViewCreated() method
+    private ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Permission is granted
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("notify", true);
+                    editor.apply();
+
+                    Toast.makeText(getContext(), "SMS permission granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Permission is not granted
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("notify", false);
+                    editor.apply();
+
+                    Toast.makeText(getContext(), "SMS permission not granted", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
 
@@ -89,7 +136,9 @@ public class ListFragment extends Fragment {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             Item item = mItems.get(position);
-            holder.mImageViewItemPic.setImageResource(R.drawable.camera_pic);
+            byte[] imageData = item.getItemImage();
+            Bitmap itemImageBitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+            holder.mImageViewItemPic.setImageBitmap(itemImageBitmap);
             holder.mTextViewName.setText(item.getItemName());
             holder.mTextViewUid.setText(String.valueOf(item.getItemUid()));
             holder.mTextViewDescription.setText(item.getItemDescription());
@@ -107,6 +156,7 @@ public class ListFragment extends Fragment {
             private TextView mTextViewUid;
             private TextView mTextViewDescription;
             private TextView mTextViewQuantity;
+            private ImageView mImageView;
             private Button mButtonDecrement;
             private Button mButtonIncrement;
             private LinearLayout mItemContents;
@@ -118,6 +168,7 @@ public class ListFragment extends Fragment {
                 mTextViewUid = view.findViewById(R.id.textViewUid);
                 mTextViewDescription = view.findViewById(R.id.textViewDescription);
                 mTextViewQuantity = view.findViewById(R.id.textViewItemQuantity);
+                mImageView = view.findViewById(R.id.imageview_detail_item_pic);
                 mButtonDecrement = view.findViewById(R.id.buttonDecrement);
                 mButtonIncrement = view.findViewById(R.id.buttonIncrement);
                 mItemContents = view.findViewById(R.id.item_content);
@@ -136,12 +187,17 @@ public class ListFragment extends Fragment {
                             uid = item.getItemUid();
                             String description = item.getItemDescription();
                             int quantity = item.getItemQty();
+                            byte[] image = item.getItemImage();
 
                             // decrement quantity
                             quantity -= 1;
 
+                            if (quantity == 0) {
+                                MainActivity.sendStockNotification(getActivity(), getContext(), item);
+                            }
+
                             // update database and close it
-                            db.updateItem(name, uid, description, quantity);
+                            db.updateItem(name, uid, description, quantity, image);
                             db.close();
 
                             int finalQuantity = quantity;
@@ -167,12 +223,13 @@ public class ListFragment extends Fragment {
                             String name = item.getItemName();
                             String description = item.getItemDescription();
                             int quantity = item.getItemQty();
+                            byte[] image = item.getItemImage();
 
                             // decrement quantity
                             quantity += 1;
 
                             // update database and close it
-                            db.updateItem(name, uid, description, quantity);
+                            db.updateItem(name, uid, description, quantity, image);
                             db.close();
 
                             int finalQuantity = quantity;
@@ -205,6 +262,7 @@ public class ListFragment extends Fragment {
                         int itemUid = item.getItemUid();
                         String itemDescription = item.getItemDescription();
                         int itemQuantity = item.getItemQty();
+                        byte[] itemImage = item.getItemImage();
 
                         // create args to pass to DetailFragment
                         Bundle args = new Bundle();
@@ -212,6 +270,7 @@ public class ListFragment extends Fragment {
                         args.putInt(DetailFragment.ITEM_UID, itemUid);
                         args.putString(DetailFragment.ITEM_DESCRIPTION, itemDescription);
                         args.putInt(DetailFragment.ITEM_QUANTITY, itemQuantity);
+                        args.putByteArray(DetailFragment.ITEM_IMAGE, itemImage);
 
                         Navigation.findNavController(v).navigate(R.id.detail_fragment, args);
                     }
@@ -222,18 +281,7 @@ public class ListFragment extends Fragment {
         @Override
         public void onViewRecycled(@NonNull ViewHolder holder) {
             super.onViewRecycled(holder);
-            holder.mButtonDecrement.setOnClickListener(null);
-            holder.mButtonIncrement.setOnClickListener(null);
-            holder.mButtonDecrement = null;
-            holder.mButtonIncrement = null;
-            holder.mImageViewItemPic.setImageDrawable(null);
-            holder.mImageViewItemPic = null;
-            holder.mTextViewName = null;
-            holder.mTextViewDescription = null;
-            holder.mTextViewUid = null;
-            holder.mTextViewQuantity = null;
-            holder.mItemContents.setOnClickListener(null);
-            holder.mItemContents = null;
+
         }
     }
 }
