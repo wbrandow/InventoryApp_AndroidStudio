@@ -3,7 +3,9 @@ package com.cs360.inventoryapp;
 import static android.content.ContentValues.TAG;
 import static java.lang.Integer.parseInt;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -80,6 +82,8 @@ public class DetailFragment extends Fragment {
         }
 
         mButtonSave.setOnClickListener(view -> {
+            SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+            String user = sharedPreferences.getString("username", "");
             String name = String.valueOf(mEditTextName.getText());
             String description = String.valueOf(mEditTextDescription.getText());
 
@@ -97,7 +101,7 @@ public class DetailFragment extends Fragment {
 
                 Thread thread = new Thread(() -> {
                     ItemDatabase db = new ItemDatabase(getContext());
-                    if (db.updateItem(name, uid, description, quantity, image)) {
+                    if (db.updateItem(user, name, uid, description, quantity, image)) {
                         db.close();
 
                         getActivity().runOnUiThread(() -> {
@@ -108,7 +112,7 @@ public class DetailFragment extends Fragment {
                             toast.show();
                         });
                     } else {
-                        long systemID = db.addItem(name, uid, description, quantity, image);
+                        long systemID = db.addItem(user, name, uid, description, quantity, image);
                         db.close();
 
                         getActivity().runOnUiThread(() -> {
@@ -139,11 +143,13 @@ public class DetailFragment extends Fragment {
 
         mButtonDelete.setOnClickListener(view -> {
             try {
+                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String user = sharedPreferences.getString("username", "");
                 int uid = parseInt(String.valueOf(mEditTextUid.getText()));
 
                 Thread thread = new Thread(() -> {
                     ItemDatabase db = new ItemDatabase(getContext());
-                    if (db.deleteItem(uid)) {
+                    if (db.deleteItem(user, uid)) {
                         db.close();
                         getActivity().runOnUiThread(() -> {
                             // notify of successful delete

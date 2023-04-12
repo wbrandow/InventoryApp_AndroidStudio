@@ -47,8 +47,10 @@ public class ListFragment extends Fragment {
 
         // FIXME: need to figure out authentication.
 
+        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        final String user = sharedPreferences.getString("username", "");
         ItemDatabase db = new ItemDatabase(getContext());
-        mItems = db.getAllItems();
+        mItems = db.getAllItems(user);
         db.close();
 
 
@@ -171,13 +173,16 @@ public class ListFragment extends Fragment {
                 mItemContents = view.findViewById(R.id.item_content);
 
                 mButtonDecrement.setOnClickListener(v -> {
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    final String user = sharedPreferences.getString("username", "");
+
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Thread thread = new Thread(() -> {
                             Item clickedItem = mItems.get(position);
                             ItemDatabase db = new ItemDatabase(getContext());
                             int uid = clickedItem.getItemUid();
-                            Item item = db.getItemByUid(uid);
+                            Item item = db.getItemByUid(user, uid);
 
                             // get item info
                             String name = item.getItemName();
@@ -194,7 +199,7 @@ public class ListFragment extends Fragment {
                             }
 
                             // update database and close it
-                            db.updateItem(name, uid, description, quantity, image);
+                            db.updateItem(user, name, uid, description, quantity, image);
                             db.close();
 
                             int finalQuantity = quantity;
@@ -208,13 +213,16 @@ public class ListFragment extends Fragment {
                 });
 
                 mButtonIncrement.setOnClickListener(v -> {
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    final String user = sharedPreferences.getString("username", "");
+
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Thread thread = new Thread(() -> {
                             Item clickedItem = mItems.get(position);
                             ItemDatabase db = new ItemDatabase(getContext());
                             int uid = clickedItem.getItemUid();
-                            Item item = db.getItemByUid(uid);
+                            Item item = db.getItemByUid(user, uid);
 
                             // get item info
                             String name = item.getItemName();
@@ -226,7 +234,7 @@ public class ListFragment extends Fragment {
                             quantity += 1;
 
                             // update database and close it
-                            db.updateItem(name, uid, description, quantity, image);
+                            db.updateItem(user, name, uid, description, quantity, image);
                             db.close();
 
                             int finalQuantity = quantity;
@@ -244,12 +252,15 @@ public class ListFragment extends Fragment {
                  *  as an argument.
                  */
                 mItemContents.setOnClickListener(v -> {
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    final String user = sharedPreferences.getString("username", "");
+
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Item clickedItem = mItems.get(position);
                         ItemDatabase db = new ItemDatabase(getContext());
                         int uid = clickedItem.getItemUid();
-                        Item item = db.getItemByUid(uid);
+                        Item item = db.getItemByUid(user, uid);
 
                         // close database
                         db.close();

@@ -1,5 +1,7 @@
 package com.cs360.inventoryapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class LoginFragment extends Fragment {
     private EditText mEditTextUsername;
@@ -28,16 +31,72 @@ public class LoginFragment extends Fragment {
         mButtonCreateUser = view.findViewById(R.id.button_create_account_submit);
 
         mButtonSubmit.setOnClickListener(v -> {
-            String username = String.valueOf(mEditTextUsername.getText());
-            String password = String.valueOf(mEditTextPassword.getText());
+            final String username = String.valueOf(mEditTextUsername.getText());
+            final String password = String.valueOf(mEditTextPassword.getText());
 
-            // FIXME: Check username and password
+            ItemDatabase db = new ItemDatabase(getContext());
 
-            Navigation.findNavController(view).navigate(R.id.list_fragment);
+            User user = db.getUser(username);
+
+            if (user != null) {
+                String hashedPassword = user.getHashedPassword();
+
+                if (AuthenicationService.verifyPassword(password, hashedPassword)) {
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("username", username);
+                    editor.apply();
+
+                    String toastMessage = "Welcome " + username;
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
+
+                    Navigation.findNavController(view).navigate(R.id.list_fragment);
+                }
+                else {
+                    String toastMessage = "Invalid Login";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
+                }
+            }
+            else {
+                String toastMessage = "Invalid Login";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                toast.show();
+            }
         });
 
         mButtonCreateUser.setOnClickListener(v -> {
-            // FIXME: Implement account creation
+            final String username = String.valueOf(mEditTextUsername.getText());
+            final String password = String.valueOf(mEditTextPassword.getText());
+
+            if (AuthenicationService.isUsernameAvailable(getContext(), username)) {
+                ItemDatabase db = new ItemDatabase(getContext());
+
+                long id = db.addUser(username, password);
+                db.close();
+
+                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("username", username);
+                editor.apply();
+
+                String toastMessage = "Username created with id " + id;
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                toast.show();
+
+                Navigation.findNavController(view).navigate(R.id.list_fragment);
+            }
+            else {
+                String toastMessage = "Username already exists";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                toast.show();
+            }
         });
 
         return view;

@@ -2,6 +2,7 @@ package com.cs360.inventoryapp;
 
 
 public class Item {
+    private String user;
     private byte[] itemImage;
     private String itemName;
     private int itemUid;
@@ -10,6 +11,7 @@ public class Item {
 
     // test constructor
     public Item(){
+        this.user = "default user";
         this.itemName = "Test Name";
         this.itemUid = 0;
         this.itemDescription = "This is a test description.";
@@ -17,7 +19,7 @@ public class Item {
         this.itemImage = null;
     }
 
-    public Item(String name, int uid, String description, int quantity, byte[] image){
+    public Item(String user, String name, int uid, String description, int quantity, byte[] image){
         this.itemName = name;
         this.itemUid = uid;
         this.itemDescription = description;

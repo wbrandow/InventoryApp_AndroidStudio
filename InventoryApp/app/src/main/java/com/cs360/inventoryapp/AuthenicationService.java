@@ -1,9 +1,13 @@
 package com.cs360.inventoryapp;
 
+import android.content.Context;
+import android.database.Cursor;
 import org.mindrot.jbcrypt.BCrypt;
 import java.security.SecureRandom;
+import java.util.List;
 
-public class HashingService {
+
+public class AuthenicationService {
     private static final int SALT_LENGTH = 16; // set the salt length to a suitable value
 
     public static String hashPassword(String password) {
@@ -22,6 +26,19 @@ public class HashingService {
         random.nextBytes(salt);
         return BCrypt.gensalt(12, random) + new String(salt);
     }
+
+    public static boolean isUsernameAvailable(Context context, String username) {
+        ItemDatabase db = new ItemDatabase(context);
+
+        List<String> usernamesList = db.getUsernames();
+
+        boolean isAvailable = !usernamesList.contains(username);
+
+        db.close();
+
+        return isAvailable;
+    }
+
 }
 
 
