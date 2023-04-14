@@ -27,6 +27,7 @@ public class NotificationDialogFragment extends DialogFragment {
         mSwitchStockNotification = view.findViewById(R.id.switch_stock_notification);
         mButtonDone = view.findViewById(R.id.button_done);
 
+        // FIXME: notification preferences should be stored in UserTable in database NOT sharedPreferences
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         boolean notify = sharedPreferences.getBoolean("notify", false);
         mSwitchStockNotification.setChecked(notify);

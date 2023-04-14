@@ -126,6 +126,11 @@ public class DetailFragment extends Fragment {
                 });
                 thread.start();
 
+                if (quantity == 0) {
+                    Item outOfStockItem = new Item(user, name, uid, description, quantity, image);
+                    MainActivity.sendStockNotification(getActivity(), getContext(), outOfStockItem);
+                }
+
                 // navigate back to list
                 Navigation.findNavController(view).navigate(R.id.list_fragment);
             }

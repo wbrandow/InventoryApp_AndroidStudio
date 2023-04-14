@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,17 +44,21 @@ public class MainActivity extends AppCompatActivity {
         String itemName = item.getItemName();
         String message = itemName + " is out of stock!";
 
-        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.SEND_SMS)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Permission is granted, get notification preferences
-            SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
-            boolean notify = sharedPreferences.getBoolean("notify", false);
+        SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+        boolean notify = sharedPreferences.getBoolean("notify", false);
 
-            if (notify) {
-                // notification preference is true, send SMS
+        if (notify) {
+            // notification preference is true
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.SEND_SMS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                // SMS permission granted
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             }
+
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
+
+
     }
 }

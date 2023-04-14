@@ -15,7 +15,6 @@ import android.widget.Toast;
 public class LoginFragment extends Fragment {
     private EditText mEditTextUsername;
     private EditText mEditTextPassword;
-
     private Button mButtonSubmit;
     private Button mButtonCreateUser;
 
@@ -55,14 +54,14 @@ public class LoginFragment extends Fragment {
                     Navigation.findNavController(view).navigate(R.id.list_fragment);
                 }
                 else {
-                    String toastMessage = "Invalid Login";
+                    String toastMessage = "Invalid login credentials";
                     int duration = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                     toast.show();
                 }
             }
             else {
-                String toastMessage = "Invalid Login";
+                String toastMessage = "No user found";
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();
@@ -73,26 +72,34 @@ public class LoginFragment extends Fragment {
             final String username = String.valueOf(mEditTextUsername.getText());
             final String password = String.valueOf(mEditTextPassword.getText());
 
-            if (AuthenicationService.isUsernameAvailable(getContext(), username)) {
-                ItemDatabase db = new ItemDatabase(getContext());
+            if (!username.isEmpty() && !password.isEmpty()) {
+                if (AuthenicationService.isUsernameAvailable(getContext(), username)) {
+                    ItemDatabase db = new ItemDatabase(getContext());
 
-                long id = db.addUser(username, password);
-                db.close();
+                    long id = db.addUser(username, password);
+                    db.close();
 
-                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("username", username);
-                editor.apply();
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("username", username);
+                    editor.apply();
 
-                String toastMessage = "Username created with id " + id;
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(getContext(), toastMessage, duration);
-                toast.show();
+                    String toastMessage = "Username created with id " + id;
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
 
-                Navigation.findNavController(view).navigate(R.id.list_fragment);
+                    Navigation.findNavController(view).navigate(R.id.list_fragment);
+                }
+                else {
+                    String toastMessage = "Username already exists";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+                    toast.show();
+                }
             }
             else {
-                String toastMessage = "Username already exists";
+                String toastMessage = "Please enter a valid username and password";
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(getContext(), toastMessage, duration);
                 toast.show();

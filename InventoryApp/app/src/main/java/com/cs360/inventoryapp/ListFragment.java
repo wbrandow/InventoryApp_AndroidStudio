@@ -45,13 +45,22 @@ public class ListFragment extends Fragment {
         mFab = rootView.findViewById(R.id.fab);
         mFab.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.detail_fragment));
 
-        // FIXME: need to figure out authentication.
-
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         final String user = sharedPreferences.getString("username", "");
-        ItemDatabase db = new ItemDatabase(getContext());
-        mItems = db.getAllItems(user);
-        db.close();
+
+        if (user != null && !user.isEmpty()) {
+            ItemDatabase db = new ItemDatabase(getContext());
+            mItems = db.getAllItems(user);
+            db.close();
+        }
+        else {
+            String toastMessage = "Please enter valid login credentials";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(getContext(), toastMessage, duration);
+            toast.show();
+
+            Navigation.findNavController(rootView).navigate(R.id.login_fragment);
+        }
 
 
         // Send items to RecyclerView
@@ -106,16 +115,6 @@ public class ListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        mFab.setOnClickListener(null);
-        mFab = null;
-        mItems = null;
-        mDivider = null;
-        mGridLayoutManager = null;
-        mItemAdaptor = null;
-        mRecyclerView.setAdapter(null);
-        mRecyclerView.setLayoutManager(null);
-        mRecyclerView = null;
     }
 
     public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
@@ -195,7 +194,9 @@ public class ListFragment extends Fragment {
                             quantity -= 1;
 
                             if (quantity == 0) {
-                                MainActivity.sendStockNotification(getActivity(), getContext(), item);
+                                getActivity().runOnUiThread(() -> {
+                                    MainActivity.sendStockNotification(getActivity(), getContext(), item);
+                                });
                             }
 
                             // update database and close it
