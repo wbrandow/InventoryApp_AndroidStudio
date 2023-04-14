@@ -192,6 +192,7 @@ public class DetailFragment extends Fragment {
         });
 
         mButtonSelectPic.setOnClickListener(v -> {
+            // FIXME: check/request permission to access photos
             mGetPhoto.launch(intent);
         });
 

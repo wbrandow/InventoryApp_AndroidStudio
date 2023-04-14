@@ -168,7 +168,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(UserTable.COL_USERNAME, username);
 
-        String hashedPassword = AuthenicationService.hashPassword(password);
+        String hashedPassword = AuthenticationService.hashPassword(password);
         values.put(UserTable.COL_PASSWORD, hashedPassword);
 
         long result = db.insert(UserTable.TABLE, null, values);

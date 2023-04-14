@@ -40,7 +40,7 @@ public class LoginFragment extends Fragment {
             if (user != null) {
                 String hashedPassword = user.getHashedPassword();
 
-                if (AuthenicationService.verifyPassword(password, hashedPassword)) {
+                if (AuthenticationService.verifyPassword(password, hashedPassword)) {
                     SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("username", username);
@@ -73,7 +73,7 @@ public class LoginFragment extends Fragment {
             final String password = String.valueOf(mEditTextPassword.getText());
 
             if (!username.isEmpty() && !password.isEmpty()) {
-                if (AuthenicationService.isUsernameAvailable(getContext(), username)) {
+                if (AuthenticationService.isUsernameAvailable(getContext(), username)) {
                     ItemDatabase db = new ItemDatabase(getContext());
 
                     long id = db.addUser(username, password);
