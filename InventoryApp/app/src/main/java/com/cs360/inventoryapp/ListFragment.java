@@ -93,20 +93,26 @@ public class ListFragment extends Fragment {
     // Initialize the ActivityResultLauncher in the onViewCreated() method
     private ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+
+                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String username = sharedPreferences.getString("username", "");
+
                 if (isGranted) {
                     // Permission is granted
-                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean("notify", true);
-                    editor.apply();
+                    if (username != null && !username.isEmpty()) {
+                        ItemDatabase db = new ItemDatabase(getContext());
+                        User user = db.getUser(username);
+                        db.updateNotifications(user, 1);
+                    }
 
                     Toast.makeText(getContext(), "SMS permission granted", Toast.LENGTH_SHORT).show();
                 } else {
                     // Permission is not granted
-                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean("notify", false);
-                    editor.apply();
+                    if (username != null && !username.isEmpty()) {
+                        ItemDatabase db = new ItemDatabase(getContext());
+                        User user = db.getUser(username);
+                        db.updateNotifications(user, 0);
+                    }
 
                     Toast.makeText(getContext(), "SMS permission not granted", Toast.LENGTH_SHORT).show();
                 }

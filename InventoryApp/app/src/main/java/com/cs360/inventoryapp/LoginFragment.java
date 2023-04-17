@@ -21,6 +21,12 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("username", "");
+        editor.apply();
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
@@ -41,8 +47,6 @@ public class LoginFragment extends Fragment {
                 String hashedPassword = user.getHashedPassword();
 
                 if (AuthenticationService.verifyPassword(password, hashedPassword)) {
-                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("username", username);
                     editor.apply();
 
@@ -79,8 +83,6 @@ public class LoginFragment extends Fragment {
                     long id = db.addUser(username, password);
                     db.close();
 
-                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("username", username);
                     editor.apply();
 

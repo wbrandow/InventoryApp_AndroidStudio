@@ -21,6 +21,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         private static final String COL_ID = "_id";
         private static final String COL_USERNAME = "username";
         private static final String COL_PASSWORD = "password";
+        private static final String COL_NOTIFY = "notifications";
     }
     private static final class ItemTable {
         private static final String TABLE = "items";
@@ -47,7 +48,8 @@ public class ItemDatabase extends SQLiteOpenHelper {
         db.execSQL("create table " + UserTable.TABLE + " (" +
                 UserTable.COL_ID + " integer primary key autoincrement, " +
                 UserTable.COL_USERNAME + " text, " +
-                UserTable.COL_PASSWORD + " text)");
+                UserTable.COL_PASSWORD + " text, " +
+                UserTable.COL_NOTIFY + " integer)");
     }
 
     @Override
@@ -171,6 +173,8 @@ public class ItemDatabase extends SQLiteOpenHelper {
         String hashedPassword = AuthenticationService.hashPassword(password);
         values.put(UserTable.COL_PASSWORD, hashedPassword);
 
+        values.put(UserTable.COL_NOTIFY, 0);
+
         long result = db.insert(UserTable.TABLE, null, values);
 
         db.close();
@@ -210,8 +214,9 @@ public class ItemDatabase extends SQLiteOpenHelper {
             do {
                 int id = cursor.getInt(0);
                 String hashedPassword = cursor.getString(2);
+                int notifications = cursor.getInt(3);
 
-                selectedUser = new User(id, username, hashedPassword);
+                selectedUser = new User(id, username, hashedPassword, notifications);
 
             } while (cursor.moveToNext());
         }
@@ -219,5 +224,22 @@ public class ItemDatabase extends SQLiteOpenHelper {
         db.close();
 
         return selectedUser;
+    }
+
+    public void updateNotifications(User user, int notifications) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String username = user.getUsername();
+        String hashedPassword = user.getHashedPassword();
+
+        ContentValues values = new ContentValues();
+        values.put(UserTable.COL_USERNAME, username);
+        values.put(UserTable.COL_PASSWORD, hashedPassword);
+        values.put(UserTable.COL_NOTIFY, notifications);
+
+        db.update(UserTable.TABLE, values, UserTable.COL_USERNAME + " = ?",
+                new String[] { username });
+
+        db.close();
     }
 }

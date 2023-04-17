@@ -27,15 +27,32 @@ public class NotificationDialogFragment extends DialogFragment {
         mSwitchStockNotification = view.findViewById(R.id.switch_stock_notification);
         mButtonDone = view.findViewById(R.id.button_done);
 
-        // FIXME: notification preferences should be stored in UserTable in database NOT sharedPreferences
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean notify = sharedPreferences.getBoolean("notify", false);
-        mSwitchStockNotification.setChecked(notify);
+        final String username = sharedPreferences.getString("username", "");
+
+        if (!username.isEmpty()) {
+            ItemDatabase db = new ItemDatabase(getContext());
+            User user = db.getUser(username);
+            db.close();
+
+            int notify = user.getNotifications();
+            mSwitchStockNotification.setChecked(notify == 1);
+        }
+        else {
+            mSwitchStockNotification.setChecked(false);
+        }
 
         mSwitchStockNotification.setOnClickListener(v -> {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("notify", mSwitchStockNotification.isChecked());
-            editor.apply();
+            ItemDatabase db = new ItemDatabase(getContext());
+            User user = db.getUser(username);
+
+            if (mSwitchStockNotification.isChecked()) {
+                db.updateNotifications(user, 1);
+            }
+            else {
+                db.updateNotifications(user, 0);
+            }
+            db.close();
 
             // Check SMS permission and notify if not granted
             if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.SEND_SMS)

@@ -26,14 +26,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.appbar_menu, menu);
+        // FIXME: implement logout as menu option
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
         if (menuItem.getItemId() == R.id.notifications) {
-            Navigation.findNavController(findViewById(R.id.nav_host_fragment))
-                    .navigate(R.id.notification_dialog_fragment);
+            SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "");
+
+            if (username != null && !username.isEmpty()) {
+                Navigation.findNavController(findViewById(R.id.nav_host_fragment))
+                        .navigate(R.id.notification_dialog_fragment);
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Please log in first!", Toast.LENGTH_SHORT).show();
+            }
         }
         return true;
     }
@@ -45,9 +54,12 @@ public class MainActivity extends AppCompatActivity {
         String message = itemName + " is out of stock!";
 
         SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
-        boolean notify = sharedPreferences.getBoolean("notify", false);
+        String username = sharedPreferences.getString("username", "");
 
-        if (notify) {
+        ItemDatabase db = new ItemDatabase(context);
+        User user = db.getUser(username);
+
+        if (user.getNotifications() == 1) {
             // notification preference is true
             if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.SEND_SMS)
                     == PackageManager.PERMISSION_GRANTED) {
