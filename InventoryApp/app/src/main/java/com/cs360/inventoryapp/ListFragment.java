@@ -1,3 +1,13 @@
+/***************************************************************************************************
+ *  ListFragment.java                                                                              *
+ *                                                                                                 *
+ *  Lists user's items from database in a recyclerView.  Allows user to increment and decrement    *
+ *  quantity.  Allows navigation to DetailFragment via clicking on item or clicking on FAB.  Gets  *
+ *  SMS permission from user.                                                                      *
+ *                                                                                                 *
+ *  Author: William Brandow                                                                        *
+ ***************************************************************************************************/
+
 package com.cs360.inventoryapp;
 
 import android.content.Context;
@@ -36,6 +46,13 @@ public class ListFragment extends Fragment {
     private GridLayoutManager mGridLayoutManager;
     private ItemAdapter mItemAdaptor;
 
+    /********************************************************************************************
+     *  Inflates view.  Creates FAB and sets onCLickListener.  Gets user's items from database  *
+     *  and displays them in recycler view.                                                     *
+     *                                                                                          *
+     *  Params: LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState         *
+     *  Returns: View rootView                                                                  *
+     ********************************************************************************************/
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -48,7 +65,7 @@ public class ListFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         final String user = sharedPreferences.getString("username", "");
 
-        if (user != null && !user.isEmpty()) {
+        if (!user.isEmpty()) {
             ItemDatabase db = new ItemDatabase(getContext());
             mItems = db.getAllItems(user);
             db.close();
@@ -77,6 +94,12 @@ public class ListFragment extends Fragment {
         return rootView;
     }
 
+    /**************************************************
+     *  Gets SMS permission from user                 *
+     *                                                *
+     *  Params: View view, Bundle savedInstanceState  *
+     *  Returns: none                                 *
+     **************************************************/
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -85,12 +108,14 @@ public class ListFragment extends Fragment {
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(android.Manifest.permission.SEND_SMS);
-        } else {
-            // Permission is already granted, send SMS message
         }
     }
 
-    // Initialize the ActivityResultLauncher in the onViewCreated() method
+    /************************************************************************************
+     *  Updates notification preferences in database from result of permission request  *
+     *                                                                                  *
+     *  Initialize the ActivityResultLauncher in the onViewCreated() method             *
+     ************************************************************************************/
     private ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
 
@@ -99,19 +124,21 @@ public class ListFragment extends Fragment {
 
                 if (isGranted) {
                     // Permission is granted
-                    if (username != null && !username.isEmpty()) {
+                    if (!username.isEmpty()) {
                         ItemDatabase db = new ItemDatabase(getContext());
                         User user = db.getUser(username);
                         db.updateNotifications(user, 1);
+                        db.close();
                     }
 
                     Toast.makeText(getContext(), "SMS permission granted", Toast.LENGTH_SHORT).show();
                 } else {
                     // Permission is not granted
-                    if (username != null && !username.isEmpty()) {
+                    if (!username.isEmpty()) {
                         ItemDatabase db = new ItemDatabase(getContext());
                         User user = db.getUser(username);
                         db.updateNotifications(user, 0);
+                        db.close();
                     }
 
                     Toast.makeText(getContext(), "SMS permission not granted", Toast.LENGTH_SHORT).show();
@@ -123,6 +150,9 @@ public class ListFragment extends Fragment {
         super.onDestroyView();
     }
 
+    /***********************************************
+     *  Adapter for RecyclerView to display items  *
+     ***********************************************/
     public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
         public ItemAdapter(List<Item> items) {
@@ -177,6 +207,11 @@ public class ListFragment extends Fragment {
                 mButtonIncrement = view.findViewById(R.id.buttonIncrement);
                 mItemContents = view.findViewById(R.id.item_content);
 
+                /********************************************************************************
+                 *  onClickListener for decrement button.                                       *
+                 *  Decreases item's quantity by 1.  Checks if quantity is 0 and, if so, calls  *
+                 *  MainActivity.sendStockNotification()                                        *
+                 ********************************************************************************/
                 mButtonDecrement.setOnClickListener(v -> {
                     SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                     final String user = sharedPreferences.getString("username", "");
@@ -219,6 +254,10 @@ public class ListFragment extends Fragment {
                     }
                 });
 
+                /******************************************
+                 *  onClickListener for increment button  *
+                 *  Increases item's quantity by 1        *
+                 ******************************************/
                 mButtonIncrement.setOnClickListener(v -> {
                     SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                     final String user = sharedPreferences.getString("username", "");
@@ -254,10 +293,10 @@ public class ListFragment extends Fragment {
                     }
                 });
 
-                /*
-                 *  When a user clicks the contents of an item pass the item's UID to the detail fragment
-                 *  as an argument.
-                 */
+                /****************************************************************************
+                 *  onClickListener for the items in the recyclerView                       *
+                 *  Pass the clicked item's info to the detail fragment and navigate there  *
+                 ****************************************************************************/
                 mItemContents.setOnClickListener(v -> {
                     SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                     final String user = sharedPreferences.getString("username", "");

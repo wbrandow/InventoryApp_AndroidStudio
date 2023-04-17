@@ -1,3 +1,9 @@
+/*
+ *  User.java
+ *
+ *  Stores 
+ */
+
 package com.cs360.inventoryapp;
 
 public class User {

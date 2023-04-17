@@ -1,3 +1,8 @@
+/********************************
+ *  AuthenticationService.java  *
+ *                              *
+ *  Author: William Brandow     *
+ ********************************/
 package com.cs360.inventoryapp;
 
 import android.content.Context;
@@ -17,8 +22,7 @@ public class AuthenticationService {
      ************************************/
     public static String hashPassword(String password) {
         String salt = generateSalt();
-        String hashedPassword = BCrypt.hashpw(password, salt);
-        return hashedPassword;
+        return BCrypt.hashpw(password, salt);
     }
 
     /****************************************************

@@ -1,3 +1,10 @@
+/*************************************************************************************************
+ *  DetailFragment.java                                                                          *
+ *                                                                                               *
+ *  Allows user to enter information to create new items, edit existing items, or delete items.  *
+ *                                                                                               *
+ *  Author: William Brandow                                                                      *
+ *************************************************************************************************/
 package com.cs360.inventoryapp;
 
 import static android.content.ContentValues.TAG;
@@ -11,8 +18,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
@@ -37,7 +42,6 @@ public class DetailFragment extends Fragment {
     public static final String ITEM_DESCRIPTION = "description";
     public static final String ITEM_QUANTITY = "quantity";
     public static final String ITEM_IMAGE = "image";
-
     private Button mButtonSave;
     private Button mButtonDelete;
     private EditText mEditTextName;
@@ -47,6 +51,13 @@ public class DetailFragment extends Fragment {
     private ImageView mImageView;
     private Button mButtonSelectPic;
 
+    /***************************************************************************************
+     *  Inflates view.  Gets arguments passed from ListFragment to use as default values.  *
+     *  Sets onClickListeners for Save, Delete, and Select Photo buttons.                  *
+     *                                                                                     *
+     *  Params: LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState    *
+     *  Returns: View rootView                                                             *
+     ***************************************************************************************/
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -81,6 +92,7 @@ public class DetailFragment extends Fragment {
             mImageView.setImageBitmap(itemImageBitmap);
         }
 
+        // Saves information to database and navigates back to ListFragment.
         mButtonSave.setOnClickListener(view -> {
             SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
             String user = sharedPreferences.getString("username", "");
@@ -146,6 +158,7 @@ public class DetailFragment extends Fragment {
             }
         });
 
+        //  Deletes item with matching UID from database and navigates back to ListFragment
         mButtonDelete.setOnClickListener(view -> {
             try {
                 SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -191,6 +204,7 @@ public class DetailFragment extends Fragment {
             }
         });
 
+        //  Launches ActivityResultLauncher<> mGetPhoto to select photo from device
         mButtonSelectPic.setOnClickListener(v -> {
             // FIXME: check/request permission to access photos
             mGetPhoto.launch(intent);
@@ -199,14 +213,11 @@ public class DetailFragment extends Fragment {
         return rootView;
     }
 
-    ActivityResultLauncher<Intent> mGetPhoto = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Uri uri = result.getData().getData();
-                        saveImageToInternalStorage(uri);
-                    }
+    ActivityResultLauncher<Intent> mGetPhoto = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Uri uri = result.getData().getData();
+                    saveImageToInternalStorage(uri);
                 }
             });
 
