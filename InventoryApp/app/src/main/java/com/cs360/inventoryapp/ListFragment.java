@@ -62,7 +62,7 @@ public class ListFragment extends Fragment {
         mFab = rootView.findViewById(R.id.fab);
         mFab.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.detail_fragment));
 
-        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
         final String user = sharedPreferences.getString("username", "");
 
         if (!user.isEmpty()) {
@@ -76,7 +76,7 @@ public class ListFragment extends Fragment {
             Toast toast = Toast.makeText(getContext(), toastMessage, duration);
             toast.show();
 
-            Navigation.findNavController(rootView).navigate(R.id.login_fragment);
+            Navigation.findNavController(getActivity(), R.id.nav_host_fragment).navigate(R.id.login_fragment);
         }
 
 
@@ -119,7 +119,7 @@ public class ListFragment extends Fragment {
     private ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
 
-                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
                 String username = sharedPreferences.getString("username", "");
 
                 if (isGranted) {

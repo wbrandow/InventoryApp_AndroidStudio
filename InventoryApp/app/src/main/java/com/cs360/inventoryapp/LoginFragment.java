@@ -22,7 +22,7 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("username", "");
         editor.apply();
@@ -40,8 +40,8 @@ public class LoginFragment extends Fragment {
             final String password = String.valueOf(mEditTextPassword.getText());
 
             ItemDatabase db = new ItemDatabase(getContext());
-
             User user = db.getUser(username);
+            db.close();
 
             if (user != null) {
                 String hashedPassword = user.getHashedPassword();

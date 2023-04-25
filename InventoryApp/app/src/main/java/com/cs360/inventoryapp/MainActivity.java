@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.appbar_menu, menu);
-        // FIXME: implement logout as menu option
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -36,9 +35,24 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
             String username = sharedPreferences.getString("username", "");
 
-            if (username != null && !username.isEmpty()) {
+            if (!username.isEmpty()) {
                 Navigation.findNavController(findViewById(R.id.nav_host_fragment))
                         .navigate(R.id.notification_dialog_fragment);
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Please log in first!", Toast.LENGTH_SHORT).show();
+            }
+        } else if (menuItem.getItemId() == R.id.logout) {
+            SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "");
+
+            if (!username.isEmpty()) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("username", "");
+                editor.apply();
+
+                Navigation.findNavController(findViewById(R.id.nav_host_fragment))
+                        .navigate(R.id.login_fragment);
             }
             else {
                 Toast.makeText(getApplicationContext(), "Please log in first!", Toast.LENGTH_SHORT).show();
@@ -48,16 +62,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void sendStockNotification(Activity activity, Context context, Item item) {
-        // FIXME: user should enter phone number
-        String phoneNumber = "5555215556";
-        String itemName = item.getItemName();
-        String message = itemName + " is out of stock!";
-
         SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "");
 
         ItemDatabase db = new ItemDatabase(context);
         User user = db.getUser(username);
+        String phoneNumber = user.getPhoneNumber();
+        String itemName = item.getItemName();
+        String message = itemName + " is out of stock!";
+
+        db.close();
 
         if (user.getNotifications() == 1) {
             // notification preference is true

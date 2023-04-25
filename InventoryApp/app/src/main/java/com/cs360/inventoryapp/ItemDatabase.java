@@ -22,6 +22,7 @@ public class ItemDatabase extends SQLiteOpenHelper {
         private static final String COL_USERNAME = "username";
         private static final String COL_PASSWORD = "password";
         private static final String COL_NOTIFY = "notifications";
+        private static final String COL_PHONE = "phone";
     }
     private static final class ItemTable {
         private static final String TABLE = "items";
@@ -49,7 +50,8 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 UserTable.COL_ID + " integer primary key autoincrement, " +
                 UserTable.COL_USERNAME + " text, " +
                 UserTable.COL_PASSWORD + " text, " +
-                UserTable.COL_NOTIFY + " integer)");
+                UserTable.COL_NOTIFY + " integer, " +
+                UserTable.COL_PHONE + " text)");
     }
 
     @Override
@@ -215,8 +217,9 @@ public class ItemDatabase extends SQLiteOpenHelper {
                 int id = cursor.getInt(0);
                 String hashedPassword = cursor.getString(2);
                 int notifications = cursor.getInt(3);
+                String phoneNumber = cursor.getString(4);
 
-                selectedUser = new User(id, username, hashedPassword, notifications);
+                selectedUser = new User(id, username, hashedPassword, notifications, phoneNumber);
 
             } while (cursor.moveToNext());
         }
@@ -231,11 +234,31 @@ public class ItemDatabase extends SQLiteOpenHelper {
 
         String username = user.getUsername();
         String hashedPassword = user.getHashedPassword();
+        String phoneNumber = user.getPhoneNumber();
 
         ContentValues values = new ContentValues();
         values.put(UserTable.COL_USERNAME, username);
         values.put(UserTable.COL_PASSWORD, hashedPassword);
         values.put(UserTable.COL_NOTIFY, notifications);
+
+        db.update(UserTable.TABLE, values, UserTable.COL_USERNAME + " = ?",
+                new String[] { username });
+
+        db.close();
+    }
+
+    public void updatePhoneNumber(User user, String phoneNumber) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String username = user.getUsername();
+        String hashedPassword = user.getHashedPassword();
+        int notifications = user.getNotifications();
+
+        ContentValues values = new ContentValues();
+        values.put(UserTable.COL_USERNAME, username);
+        values.put(UserTable.COL_PASSWORD, hashedPassword);
+        values.put(UserTable.COL_NOTIFY, notifications);
+        values.put(UserTable.COL_PHONE, phoneNumber);
 
         db.update(UserTable.TABLE, values, UserTable.COL_USERNAME + " = ?",
                 new String[] { username });

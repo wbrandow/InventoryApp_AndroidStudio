@@ -11,11 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
 public class NotificationDialogFragment extends DialogFragment {
     private Switch mSwitchStockNotification;
+    private EditText mEditTextPhoneNumber;
     private Button mButtonDone;
 
     @Override
@@ -26,8 +28,9 @@ public class NotificationDialogFragment extends DialogFragment {
 
         mSwitchStockNotification = view.findViewById(R.id.switch_stock_notification);
         mButtonDone = view.findViewById(R.id.button_done);
+        mEditTextPhoneNumber = view.findViewById(R.id.edittext_notification_number);
 
-        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
         final String username = sharedPreferences.getString("username", "");
 
         if (!username.isEmpty()) {
@@ -37,6 +40,9 @@ public class NotificationDialogFragment extends DialogFragment {
 
             int notify = user.getNotifications();
             mSwitchStockNotification.setChecked(notify == 1);
+
+            String phoneNumber = user.getPhoneNumber();
+            mEditTextPhoneNumber.setText(phoneNumber);
         }
         else {
             mSwitchStockNotification.setChecked(false);
@@ -63,6 +69,12 @@ public class NotificationDialogFragment extends DialogFragment {
         });
 
         mButtonDone.setOnClickListener(v -> {
+            ItemDatabase db = new ItemDatabase(getContext());
+            User user = db.getUser(username);
+            String phoneNumber = String.valueOf(mEditTextPhoneNumber.getText());
+            db.updatePhoneNumber(user, phoneNumber);
+            db.close();
+
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             fragmentManager.popBackStack();
         });

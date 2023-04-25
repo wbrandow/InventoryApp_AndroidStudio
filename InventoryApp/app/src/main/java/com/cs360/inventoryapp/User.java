@@ -1,7 +1,7 @@
 /*
  *  User.java
  *
- *  Stores 
+ *  Stores
  */
 
 package com.cs360.inventoryapp;
@@ -13,11 +13,14 @@ public class User {
 
     private int notifications;
 
-    public User(int id, String username, String hashedPassword, int notifications) {
+    private String phoneNumber;
+
+    public User(int id, String username, String hashedPassword, int notifications, String phoneNumber) {
         this.id = id;
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.notifications = notifications;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getHashedPassword() {
@@ -27,4 +30,6 @@ public class User {
     public int getNotifications() { return notifications; }
 
     public String getUsername() { return username; }
+
+    public String getPhoneNumber() { return phoneNumber; }
 }

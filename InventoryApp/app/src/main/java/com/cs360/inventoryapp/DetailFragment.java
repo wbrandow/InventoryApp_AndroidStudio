@@ -9,17 +9,22 @@ package com.cs360.inventoryapp;
 
 import static android.content.ContentValues.TAG;
 import static java.lang.Integer.parseInt;
+
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import android.provider.MediaStore;
@@ -74,6 +79,17 @@ public class DetailFragment extends Fragment {
         mImageView = rootView.findViewById(R.id.imageview_detail_item_pic);
         mButtonSelectPic = rootView.findViewById(R.id.button_select_pic);
 
+        // Call the ActivityResultLauncher to request the SEND_SMS permission
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_MEDIA_IMAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= 33) {
+                requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES);
+            }
+            else {
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+        }
+
         // Get the clickedItem info from ListFragment
         Bundle args = getArguments();
         if (args != null) {
@@ -94,7 +110,7 @@ public class DetailFragment extends Fragment {
 
         // Saves information to database and navigates back to ListFragment.
         mButtonSave.setOnClickListener(view -> {
-            SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
             String user = sharedPreferences.getString("username", "");
             String name = String.valueOf(mEditTextName.getText());
             String description = String.valueOf(mEditTextDescription.getText());
@@ -116,7 +132,7 @@ public class DetailFragment extends Fragment {
                     if (db.updateItem(user, name, uid, description, quantity, image)) {
                         db.close();
 
-                        getActivity().runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
                             // notify user of successful update
                             String toastMessage = name + " successfully updated!";
                             int duration = Toast.LENGTH_SHORT;
@@ -127,7 +143,7 @@ public class DetailFragment extends Fragment {
                         long systemID = db.addItem(user, name, uid, description, quantity, image);
                         db.close();
 
-                        getActivity().runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
                             // notify user of successful addition
                             String toastMessage = name + " added to inventory with id " + systemID;
                             int duration = Toast.LENGTH_SHORT;
@@ -140,7 +156,7 @@ public class DetailFragment extends Fragment {
 
                 if (quantity == 0) {
                     Item outOfStockItem = new Item(user, name, uid, description, quantity, image);
-                    MainActivity.sendStockNotification(getActivity(), getContext(), outOfStockItem);
+                    MainActivity.sendStockNotification(requireActivity(), requireContext(), outOfStockItem);
                 }
 
                 // navigate back to list
@@ -161,7 +177,7 @@ public class DetailFragment extends Fragment {
         //  Deletes item with matching UID from database and navigates back to ListFragment
         mButtonDelete.setOnClickListener(view -> {
             try {
-                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
                 String user = sharedPreferences.getString("username", "");
                 int uid = parseInt(String.valueOf(mEditTextUid.getText()));
 
@@ -169,7 +185,7 @@ public class DetailFragment extends Fragment {
                     ItemDatabase db = new ItemDatabase(getContext());
                     if (db.deleteItem(user, uid)) {
                         db.close();
-                        getActivity().runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
                             // notify of successful delete
                             String toastMessage = "Item with UID: " + uid + " deleted.";
                             int duration = Toast.LENGTH_SHORT;
@@ -181,7 +197,7 @@ public class DetailFragment extends Fragment {
                         });
                     } else {
                         db.close();
-                        getActivity().runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
                             // notify user of no item exists
                             String toastMessage = "Item with UID: " + uid + " not found.";
                             int duration = Toast.LENGTH_SHORT;
@@ -206,12 +222,34 @@ public class DetailFragment extends Fragment {
 
         //  Launches ActivityResultLauncher<> mGetPhoto to select photo from device
         mButtonSelectPic.setOnClickListener(v -> {
-            // FIXME: check/request permission to access photos
-            mGetPhoto.launch(intent);
+
+            // Call the ActivityResultLauncher to request the SEND_SMS permission
+            if ((Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) ||
+                    (Build.VERSION.SDK_INT < 33 && ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
+                mGetPhoto.launch(intent);
+            }
+            else {
+                String message = "Permission not granted. Update permissions in phone settings";
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
         });
 
         return rootView;
     }
+
+    private ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+
+                if (isGranted) {
+                    // Permission is granted
+                    Toast.makeText(getContext(), "Photo permission granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Permission is not granted
+                    Toast.makeText(getContext(), "Photo permission not granted", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     ActivityResultLauncher<Intent> mGetPhoto = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -227,14 +265,13 @@ public class DetailFragment extends Fragment {
 
     private void saveImageToInternalStorage(Uri uri) {
         try {
-            InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
             // Save the bitmap to internal storage
             // Convert the bitmap to a byte array
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
 
             mImageView.setImageBitmap(bitmap);
 
